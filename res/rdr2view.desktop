@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=0.1
+Encoding=UTF-8
+Type=Application
+Name=rdr2view
+Comment=rdr2view
+Categories=Qt;Application;Utility;
+Exec=rdr2view
+Icon=gta5view
+Terminal=false
+StartupNotify=false

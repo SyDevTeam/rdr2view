@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UserInterface</class>
+ <widget class="QMainWindow" name="UserInterface">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>625</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>625</width>
+    <height>500</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>%2 - %1</string>
+  </property>
+  <widget class="QWidget" name="cwUI">
+   <layout class="QVBoxLayout" name="vlUI">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QStackedWidget" name="swProfile">
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="swSelection">
+       <layout class="QVBoxLayout" name="vlUserInterface">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="leftMargin">
+         <number>9</number>
+        </property>
+        <property name="topMargin">
+         <number>9</number>
+        </property>
+        <property name="rightMargin">
+         <number>9</number>
+        </property>
+        <property name="bottomMargin">
+         <number>9</number>
+        </property>
+        <item>
+         <spacer name="vsUpper">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labSelectProfile">
+          <property name="text">
+           <string>Select profile</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="vlButtons"/>
+        </item>
+        <item>
+         <spacer name="vsFooter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="hlButtons">
+          <item>
+           <widget class="QLabel" name="labVersion">
+            <property name="text">
+             <string>%1 %2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="hsButtons">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cmdReload">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Reload profile overview</string>
+            </property>
+            <property name="text">
+             <string>&amp;Reload</string>
+            </property>
+            <property name="autoDefault">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cmdClose">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string extracomment="Close %1 &lt;- (gta5view/gta5sync) - %1 will be replaced automatically">Close %1</string>
+            </property>
+            <property name="text">
+             <string>&amp;Close</string>
+            </property>
+            <property name="autoDefault">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>625</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionSelect_GTA_Folder"/>
+    <addaction name="actionOpen_File"/>
+    <addaction name="actionSelect_profile"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionAbout_gta5sync"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionOptions"/>
+   </widget>
+   <widget class="QMenu" name="menuProfile">
+    <property name="title">
+     <string>&amp;Profile</string>
+    </property>
+    <widget class="QMenu" name="menuSelection_visibility">
+     <property name="title">
+      <string>&amp;Selection visibility</string>
+     </property>
+     <addaction name="action_Enable_In_game"/>
+     <addaction name="action_Disable_In_game"/>
+    </widget>
+    <widget class="QMenu" name="menuManage_selection">
+     <property name="title">
+      <string>Selection &amp;mass tools</string>
+     </property>
+     <addaction name="actionQualify_as_Avatar"/>
+     <addaction name="actionChange_Players"/>
+     <addaction name="actionSet_Crew"/>
+     <addaction name="actionSet_Title"/>
+    </widget>
+    <addaction name="action_Import"/>
+    <addaction name="actionExport_selected"/>
+    <addaction name="actionDelete_selected"/>
+    <addaction name="separator"/>
+    <addaction name="menuManage_selection"/>
+    <addaction name="menuSelection_visibility"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_all"/>
+    <addaction name="actionDeselect_all"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuProfile"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionAbout_gta5sync">
+   <property name="text">
+    <string>&amp;About %1</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionSelect_profile">
+   <property name="text">
+    <string>Close &amp;Profile</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+End</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>&amp;Settings</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSelect_all">
+   <property name="text">
+    <string>Select &amp;All</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionDeselect_all">
+   <property name="text">
+    <string>&amp;Deselect All</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionExport_selected">
+   <property name="text">
+    <string>&amp;Export selected...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionDelete_selected">
+   <property name="text">
+    <string>&amp;Remove selected</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="action_Import">
+   <property name="text">
+    <string>&amp;Import files...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionOpen_File">
+   <property name="text">
+    <string>&amp;Open File...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSelect_GTA_Folder">
+   <property name="text">
+    <string>Select &amp;RDR 2 Folder...</string>
+   </property>
+   <property name="toolTip">
+    <string>Select RDR 2 Folder...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+G</string>
+   </property>
+  </action>
+  <action name="action_Enable_In_game">
+   <property name="text">
+    <string>Show In-gam&amp;e</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+E</string>
+   </property>
+  </action>
+  <action name="action_Disable_In_game">
+   <property name="text">
+    <string>Hi&amp;de In-game</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+D</string>
+   </property>
+  </action>
+  <action name="actionSet_Title">
+   <property name="text">
+    <string>Change &amp;Title...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+T</string>
+   </property>
+  </action>
+  <action name="actionSet_Crew">
+   <property name="text">
+    <string>Change &amp;Crew...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+C</string>
+   </property>
+  </action>
+  <action name="actionQualify_as_Avatar">
+   <property name="text">
+    <string>&amp;Qualify as Avatar</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+Q</string>
+   </property>
+  </action>
+  <action name="actionChange_Players">
+   <property name="text">
+    <string>Change &amp;Players...</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Shift+P</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cmdClose</sender>
+   <signal>clicked()</signal>
+   <receiver>UserInterface</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>572</x>
+     <y>476</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>312</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
