@@ -433,8 +433,8 @@ QString SnapmaticPicture::getSnapmaticHeaderString(const QByteArray &snapmaticHe
 QString SnapmaticPicture::getSnapmaticJSONString(const QByteArray &jsonBytes)
 {
     QByteArray jsonUsefulBytes = jsonBytes;
-    jsonUsefulBytes.replace('\x00', QString());
-    jsonUsefulBytes.replace('\x0c', QString());
+    jsonUsefulBytes.replace('\x00', "");
+    jsonUsefulBytes.replace('\x0c', "");
     return QString::fromUtf8(jsonUsefulBytes.trimmed());
 }
 
@@ -1339,7 +1339,8 @@ bool SnapmaticPicture::setPictureVisible()
 
 QSize SnapmaticPicture::getSnapmaticResolution()
 {
-    return snapmaticResolution;
+    // keep old UI size for now
+    return QSize(960, 536);
 }
 
 // SNAPMATIC DEFAULTS

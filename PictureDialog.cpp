@@ -135,12 +135,15 @@ void PictureDialog::setupPictureDialog()
     smpic = nullptr;
     crewStr = "";
 
+    // Get Snapmatic Resolution
+    QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+
     // Avatar area
     qreal screenRatio = AppEnv::screenRatio();
     qreal screenRatioPR = AppEnv::screenRatioPR();
     if (screenRatio != 1 || screenRatioPR != 1)
     {
-        avatarAreaPicture = QImage(":/img/avatararea.png").scaledToHeight(536 * screenRatio * screenRatioPR, Qt::FastTransformation);
+        avatarAreaPicture = QImage(":/img/avatararea.png").scaledToHeight(snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::FastTransformation);
     }
     else
     {
@@ -151,7 +154,7 @@ void PictureDialog::setupPictureDialog()
     avatarSize = 470;
 
     // DPI calculation (picture)
-    ui->labPicture->setFixedSize(960 * screenRatio, 536 * screenRatio);
+    ui->labPicture->setFixedSize(snapmaticResolution.width() * screenRatio, snapmaticResolution.height() * screenRatio);
     ui->labPicture->setFocusPolicy(Qt::StrongFocus);
     ui->labPicture->setScaledContents(true);
 
@@ -199,8 +202,8 @@ void PictureDialog::setupPictureDialog()
     ui->jsonLayout->setContentsMargins(4 * screenRatio, 10 * screenRatio, 4 * screenRatio, 4 * screenRatio);
 
     // Pre-adapt window for DPI
-    setFixedWidth(960 * screenRatio);
-    setFixedHeight(536 * screenRatio);
+    setFixedWidth(snapmaticResolution.width() * screenRatio);
+    setFixedHeight(snapmaticResolution.height() * screenRatio);
 }
 
 PictureDialog::~PictureDialog()
@@ -216,6 +219,15 @@ PictureDialog::~PictureDialog()
         delete layout()->menuBar();
     }
 #endif
+#else
+    if (naviEnabled)
+    {
+        for (QObject *obj : layout()->menuBar()->children())
+        {
+            delete obj;
+        }
+        delete layout()->menuBar();
+    }
 #endif
     for (QObject *obj : manageMenu->children())
     {
@@ -236,18 +248,31 @@ void PictureDialog::closeEvent(QCloseEvent *ev)
 
 void PictureDialog::addPreviousNextButtons()
 {
-    // Windows Vista additions
 #ifdef GTA5SYNC_WIN
 #if QT_VERSION >= 0x050200
     QToolBar *uiToolbar = new QToolBar("Picture Toolbar", this);
     uiToolbar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    uiToolbar->setObjectName("uiToolbar");
+    uiToolbar->setObjectName("UiToolbar");
     uiToolbar->addAction(QIcon(":/img/back.svgz"), "", this, SLOT(previousPictureRequestedSlot()));
     uiToolbar->addAction(QIcon(":/img/next.svgz"), "", this, SLOT(nextPictureRequestedSlot()));
     layout()->setMenuBar(uiToolbar);
-
     naviEnabled = true;
 #endif
+#else
+    QToolBar *uiToolbar = new QToolBar("Picture Toolbar", this);
+#if QT_VERSION < 0x050600
+    qreal screenRatio = AppEnv::screenRatio();
+    if (screenRatio != 1) {
+        QSize iconSize = uiToolbar->iconSize();
+        uiToolbar->setIconSize(QSize(iconSize.width() * screenRatio, iconSize.height() * screenRatio));
+    }
+#endif
+    uiToolbar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    uiToolbar->setObjectName("UiToolbar");
+    uiToolbar->addAction(QIcon(":/img/back.svgz"), "", this, SLOT(previousPictureRequestedSlot()));
+    uiToolbar->addAction(QIcon(":/img/next.svgz"), "", this, SLOT(nextPictureRequestedSlot()));
+    layout()->setMenuBar(uiToolbar);
+    naviEnabled = true;
 #endif
 }
 
@@ -368,7 +393,11 @@ void PictureDialog::resizeEvent(QResizeEvent *event)
 void PictureDialog::adaptNewDialogSize(QSize newLabelSize)
 {
     Q_UNUSED(newLabelSize)
+#if QT_VERSION >= 0x050F00
+    int newDialogHeight = SnapmaticPicture::getSnapmaticResolution().height();
+#else
     int newDialogHeight = (ui->labPicture->pixmap()->height() / AppEnv::screenRatioPR());
+#endif
     newDialogHeight = newDialogHeight + ui->jsonFrame->height();
     if (naviEnabled) newDialogHeight = newDialogHeight + layout()->menuBar()->height();
     setMaximumSize(width(), newDialogHeight);
@@ -686,10 +715,11 @@ void PictureDialog::renderPicture()
     {
         if (overlayEnabled)
         {
-            QPixmap shownImagePixmap(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR);
+            QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+            QPixmap shownImagePixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
             shownImagePixmap.fill(Qt::transparent);
             QPainter shownImagePainter(&shownImagePixmap);
-            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             shownImagePainter.drawImage(3 * screenRatio * screenRatioPR, 3 * screenRatio * screenRatioPR, overlayTempImage);
             shownImagePainter.end();
 #if QT_VERSION >= 0x050600
@@ -699,10 +729,11 @@ void PictureDialog::renderPicture()
         }
         else
         {
-            QPixmap shownImagePixmap(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR);
+            QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+            QPixmap shownImagePixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
             shownImagePixmap.fill(Qt::transparent);
             QPainter shownImagePainter(&shownImagePixmap);
-            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             shownImagePainter.end();
 #if QT_VERSION >= 0x050600
             shownImagePixmap.setDevicePixelRatio(screenRatioPR);
@@ -713,15 +744,16 @@ void PictureDialog::renderPicture()
     else
     {
         // Generating Avatar Preview
-        QPixmap avatarPixmap(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR);
+        QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+        QPixmap avatarPixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
         QPainter snapPainter(&avatarPixmap);
         QFont snapPainterFont;
         snapPainterFont.setPixelSize(12 * screenRatio * screenRatioPR);
-        snapPainter.drawImage(0, 0, snapmaticPicture.scaled(960 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        snapPainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         snapPainter.drawImage(0, 0, avatarAreaPicture);
         snapPainter.setPen(QColor::fromRgb(255, 255, 255, 255));
         snapPainter.setFont(snapPainterFont);
-        snapPainter.drawText(QRect(3 * screenRatio * screenRatioPR, 3 * screenRatio * screenRatioPR, 140 * screenRatio * screenRatioPR, 536 * screenRatio * screenRatioPR), Qt::AlignLeft | Qt::TextWordWrap, tr("Avatar Preview Mode\nPress 1 for Default View"));
+        snapPainter.drawText(QRect(3 * screenRatio * screenRatioPR, 3 * screenRatio * screenRatioPR, 140 * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR), Qt::AlignLeft | Qt::TextWordWrap, tr("Avatar Preview Mode\nPress 1 for Default View"));
         snapPainter.end();
 #if QT_VERSION >= 0x050600
         avatarPixmap.setDevicePixelRatio(screenRatioPR);

@@ -70,9 +70,18 @@ JsonEditorDialog::JsonEditorDialog(SnapmaticPicture *picture, QWidget *parent) :
 
 #if QT_VERSION >= 0x050200
     ui->txtJSON->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+#else
+    QFont jsonFont = ui->txtJSON->font();
+    jsonFont.setStyleHint(QFont::Monospace);
+    jsonFont.setFixedPitch(true);
+    ui->txtJSON->setFont(jsonFont);
 #endif
     QFontMetrics fontMetrics(ui->txtJSON->font());
+#if QT_VERSION >= 0x050B00
+    ui->txtJSON->setTabStopDistance(fontMetrics.horizontalAdvance("    "));
+#else
     ui->txtJSON->setTabStopWidth(fontMetrics.width("    "));
+#endif
 
     QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonCode.toUtf8());
     ui->txtJSON->setStyleSheet("QPlainTextEdit{background-color: rgb(46, 47, 48); color: rgb(238, 231, 172);}");

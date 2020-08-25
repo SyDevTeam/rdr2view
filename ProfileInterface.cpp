@@ -264,7 +264,11 @@ void ProfileInterface::insertSnapmaticIPI(QWidget *widget)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
+#if QT_VERSION >= 0x050F00
+        std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#else
         qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
@@ -284,7 +288,11 @@ void ProfileInterface::insertSavegameIPI(QWidget *widget)
         QString widgetKey = widgets[proWidget];
         QStringList widgetsKeyList = widgets.values();
         QStringList savegameKeyList = widgetsKeyList.filter("SGD", Qt::CaseSensitive);
+#if QT_VERSION >= 0x050F00
+        std::sort(savegameKeyList.begin(), savegameKeyList.end());
+#else
         qSort(savegameKeyList.begin(), savegameKeyList.end());
+#endif
         int sgdIndex = savegameKeyList.indexOf(QRegExp(widgetKey));
         ui->vlSavegame->insertWidget(sgdIndex, proWidget);
 
@@ -303,7 +311,11 @@ void ProfileInterface::dialogNextPictureRequested(QWidget *dialog)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
+#if QT_VERSION >= 0x050F00
+        std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#else
         qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
@@ -338,7 +350,11 @@ void ProfileInterface::dialogPreviousPictureRequested(QWidget *dialog)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
+#if QT_VERSION >= 0x050F00
+        std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#else
         qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
+#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
@@ -369,7 +385,12 @@ void ProfileInterface::sortingProfileInterface()
     ui->vlSnapmatic->setEnabled(false);
 
     QStringList widgetsKeyList = widgets.values();
+
+#if QT_VERSION >= 0x050F00
+    std::sort(widgetsKeyList.begin(), widgetsKeyList.end());
+#else
     qSort(widgetsKeyList.begin(), widgetsKeyList.end());
+#endif
 
     for (QString widgetKey : widgetsKeyList)
     {
@@ -1627,7 +1648,7 @@ void ProfileInterface::contextMenuTriggeredPIC(QContextMenuEvent *ev)
     contextMenuOpened = true;
     contextMenu.exec(ev->globalPos());
     contextMenuOpened = false;
-    hoverProfileWidgetCheck();
+    QTimer::singleShot(0, this, SLOT(hoverProfileWidgetCheck()));
 }
 
 void ProfileInterface::contextMenuTriggeredSGD(QContextMenuEvent *ev)
@@ -1660,7 +1681,7 @@ void ProfileInterface::contextMenuTriggeredSGD(QContextMenuEvent *ev)
     contextMenuOpened = true;
     contextMenu.exec(ev->globalPos());
     contextMenuOpened = false;
-    hoverProfileWidgetCheck();
+    QTimer::singleShot(0, this, SLOT(hoverProfileWidgetCheck()));
 }
 
 void ProfileInterface::on_saProfileContent_dropped(const QMimeData *mimeData)
@@ -1781,19 +1802,23 @@ bool ProfileInterface::eventFilter(QObject *watched, QEvent *event)
             return true;
         }
     }
-    else if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::WindowActivate)
+    else if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)
     {
         if ((watched->objectName() == "SavegameWidget" || watched->objectName() == "SnapmaticWidget") && isProfileLoaded)
         {
             ProfileWidget *pWidget = nullptr;
-            for (ProfileWidget *widget : widgets.keys())
+            QMap<ProfileWidget*, QString>::const_iterator it = widgets.constBegin();
+            QMap<ProfileWidget*, QString>::const_iterator end = widgets.constEnd();
+            while (it != end)
             {
+                ProfileWidget *widget = it.key();
                 QPoint mousePos = widget->mapFromGlobal(QCursor::pos());
                 if (widget->rect().contains(mousePos))
                 {
                     pWidget = widget;
                     break;
                 }
+                it++;
             }
             if (pWidget != nullptr)
             {
@@ -1827,7 +1852,7 @@ bool ProfileInterface::eventFilter(QObject *watched, QEvent *event)
     }
     else if (event->type() == QEvent::WindowDeactivate && isProfileLoaded)
     {
-        if (previousWidget != nullptr)
+        if (previousWidget != nullptr && watched == previousWidget)
         {
             previousWidget->setStyleSheet(QLatin1String(""));
             previousWidget = nullptr;
@@ -1863,13 +1888,17 @@ bool ProfileInterface::eventFilter(QObject *watched, QEvent *event)
 void ProfileInterface::hoverProfileWidgetCheck()
 {
     ProfileWidget *pWidget = nullptr;
-    for (ProfileWidget *widget : widgets.keys())
+    QMap<ProfileWidget*, QString>::const_iterator it = widgets.constBegin();
+    QMap<ProfileWidget*, QString>::const_iterator end = widgets.constEnd();
+    while (it != end)
     {
+        ProfileWidget *widget = it.key();
         if (widget->underMouse())
         {
             pWidget = widget;
             break;
         }
+        it++;
     }
     if (pWidget != nullptr)
     {
