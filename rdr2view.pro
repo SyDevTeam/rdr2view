@@ -16,7 +16,7 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*****************************************************************************/
 
-QT       += core gui network svg
+QT += core gui network svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 4): greaterThan(QT_MINOR_VERSION, 1): win32: QT += winextras
@@ -40,6 +40,7 @@ SOURCES += main.cpp \
     ImportDialog.cpp \
     JsonEditorDialog.cpp \
     MapLocationDialog.cpp \
+    MessageThread.cpp \
     OptionsDialog.cpp \
     PictureDialog.cpp \
     PictureExport.cpp \
@@ -69,7 +70,7 @@ SOURCES += main.cpp \
     uimod/UiModLabel.cpp \
     uimod/UiModWidget.cpp
 
-HEADERS  += \
+HEADERS += \
     AboutDialog.h \
     AppEnv.h \
     CrewDatabase.h \
@@ -81,6 +82,7 @@ HEADERS  += \
     ImportDialog.h \
     JsonEditorDialog.h \
     MapLocationDialog.h \
+    MessageThread.h \
     OptionsDialog.h \
     PictureDialog.h \
     PictureExport.h \
@@ -112,7 +114,7 @@ HEADERS  += \
     uimod/UiModLabel.h \
     uimod/UiModWidget.h
 
-FORMS    += \
+FORMS += \
     AboutDialog.ui \
     ExportDialog.ui \
     ImportDialog.ui \
@@ -160,8 +162,9 @@ INCLUDEPATH += ./anpro ./pcg ./tmext ./uimod
 
 # GTA5SYNC/GTA5VIEW/RDR2VIEW ONLY
 
-DEFINES += GTA5SYNC_PROJECT # Enable exclusive gta5sync/gta5view/rdr2view functions
-DEFINES += GTA5SYNC_NOASSIST # Not assisting at proper usage of SnapmaticPicture class
+DEFINES += GTA5SYNC_QMAKE # We using qmake do we?
+DEFINES += GTA5SYNC_PROJECT # Enable exclusive gta5sync/gta5view functions
+DEFINES += SNAPMATIC_NODEFAULT # Not assisting at proper usage of SnapmaticPicture class
 
 # WINDOWS ONLY
 
@@ -229,9 +232,21 @@ contains(DEFINES, GTA5SYNC_QCONF){
 
 # TELEMETRY BASED STUFF
 
-!contains(DEFINES, GTA5SYNC_TELEMETRY){
+!contains(DEFINES, GTA5SYNC_TELEMETRY) {
     SOURCES -= TelemetryClass.cpp \
         tmext/TelemetryClassAuthenticator.cpp
     HEADERS -= TelemetryClass.h \
         tmext/TelemetryClassAuthenticator.h
+}
+
+!contains(DEFINES, GTA5SYNC_MOTD) {
+    SOURCES -= MessageThread.cpp
+    HEADERS -= MessageThread.h
+} else {
+    lessThan(QT_MAJOR_VERSION, 5) {
+        SOURCES -= MessageThread.cpp
+        HEADERS -= MessageThread.h
+        DEFINES -= GTA5SYNC_MOTD
+        message("Messages require Qt5 or newer!")
+    }
 }

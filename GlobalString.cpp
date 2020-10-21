@@ -35,9 +35,11 @@ QMap<QString, QString> GlobalString::getGlobalMap()
 {
     QMap<QString, QString> globalMap;
     QSettings globalFile(getLanguageFile(), QSettings::IniFormat);
+#if QT_VERSION < 0x060000
     globalFile.setIniCodec("UTF-8");
+#endif
     globalFile.beginGroup("Global");
-    for (QString globalStr : globalFile.childKeys())
+    for (const QString &globalStr : globalFile.childKeys())
     {
         globalMap[globalStr] = globalFile.value(globalStr, globalStr).toString();
     }
@@ -49,7 +51,9 @@ QString GlobalString::getString(QString valueStr, bool *ok)
 {
     QString globalString = valueStr;
     QSettings globalFile(getLanguageFile(), QSettings::IniFormat);
+#if QT_VERSION < 0x060000
     globalFile.setIniCodec("UTF-8");
+#endif
     globalFile.beginGroup("Global");
     QStringList globalStrList = globalFile.childKeys();
     if (globalStrList.contains(valueStr))

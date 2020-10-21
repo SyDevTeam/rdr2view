@@ -22,7 +22,6 @@
 #include <QJsonObject>
 #include <QStringList>
 #include <QVariantMap>
-#include <QTextCodec>
 #include <QJsonArray>
 #include <QFileInfo>
 #include <QPainter>
@@ -32,6 +31,10 @@
 #include <QImage>
 #include <QSize>
 #include <QFile>
+
+#if QT_VERSION < 0x060000
+#include <QTextCodec>
+#endif
 
 #if QT_VERSION >= 0x050000
 #include <QSaveFile>
@@ -106,7 +109,7 @@ void SnapmaticPicture::reset()
     jsonStr = QString();
 
     // SNAPMATIC DEFAULTS
-#ifdef GTA5SYNC_NOASSIST
+#ifdef SNAPMATIC_NODEFAULT
     careSnapDefault = false;
 #else
     careSnapDefault = true;
@@ -993,7 +996,11 @@ void SnapmaticPicture::parseJsonContent()
         bool timestampOk;
         QDateTime createdTimestamp;
         localProperties.createdTimestamp = jsonMap["creat"].toUInt(&timestampOk);
+#if QT_VERSION >= 0x060000
+        createdTimestamp.setSecsSinceEpoch(QString::number(localProperties.createdTimestamp).toLongLong());
+#else
         createdTimestamp.setTime_t(localProperties.createdTimestamp);
+#endif
         localProperties.createdDateTime = createdTimestamp;
         if (!timestampOk) { jsonError = true; }
     }
@@ -1418,7 +1425,13 @@ bool SnapmaticPicture::verifyTitleChar(const QChar &titleChar)
 QString SnapmaticPicture::parseTitleString(const QByteArray &commitBytes, int maxLength)
 {
     Q_UNUSED(maxLength)
+#if QT_VERSION >= 0x060000
+    QStringDecoder strDecoder = QStringDecoder(QStringDecoder::Utf16LE);
+    QString retStr = strDecoder(commitBytes);
+    retStr = retStr.trimmed();
+#else
     QString retStr = QTextCodec::codecForName("UTF-16LE")->toUnicode(commitBytes).trimmed();
+#endif
     retStr.remove(QChar('\x00'));
     return retStr;
 }

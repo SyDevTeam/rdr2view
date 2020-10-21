@@ -22,13 +22,17 @@
 #include "StandardPaths.h"
 #include <QtGlobal>
 #include <QStringBuilder>
-#include <QDesktopWidget>
 #include <QApplication>
 #include <QSettings>
 #include <QScreen>
 #include <QDebug>
 #include <QRect>
 #include <QDir>
+
+#if QT_VERSION < 0x050000
+#include <QDesktopWidget>
+#endif
+
 #include <iostream>
 using namespace std;
 
@@ -153,7 +157,7 @@ QString AppEnv::getPluginsFolder()
 QByteArray AppEnv::getUserAgent()
 {
 #if QT_VERSION >= 0x050400
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
     QString kernelVersion = QSysInfo::kernelVersion();
     const QStringList &kernelVersionList = kernelVersion.split(".");
     if (kernelVersionList.length() > 2)
@@ -210,7 +214,7 @@ QUrl AppEnv::getPlayerFetchingUrl(QString crewID, int pageNumber)
 
 GameVersion AppEnv::getGameVersion()
 {
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
     QString argumentValue;
 #ifdef _WIN64
     argumentValue = "\\WOW6432Node";
@@ -268,7 +272,7 @@ GameLanguage AppEnv::getGameLanguage(GameVersion gameVersion)
 {
     if (gameVersion == GameVersion::SocialClubVersion)
     {
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
         QString argumentValue;
 #ifdef _WIN64
         argumentValue = "\\WOW6432Node";
@@ -282,7 +286,7 @@ GameLanguage AppEnv::getGameLanguage(GameVersion gameVersion)
     }
     else if (gameVersion == GameVersion::SteamVersion)
     {
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
         QString argumentValue;
 #ifdef _WIN64
         argumentValue = "\\WOW6432Node";
@@ -443,7 +447,7 @@ bool AppEnv::setGameLanguage(GameVersion gameVersion, GameLanguage gameLanguage)
     }
     if (socialClubVersion)
     {
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
         QString argumentValue;
 #ifdef _WIN64
         argumentValue = "\\WOW6432Node";
@@ -468,7 +472,7 @@ bool AppEnv::setGameLanguage(GameVersion gameVersion, GameLanguage gameLanguage)
     }
     if (steamVersion)
     {
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
         QString argumentValue;
 #ifdef _WIN64
         argumentValue = "\\WOW6432Node";

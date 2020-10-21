@@ -52,7 +52,6 @@
 #include <QClipboard>
 #include <QFileInfo>
 #include <QPainter>
-#include <QRegExp>
 #include <QAction>
 #include <QDebug>
 #include <QColor>
@@ -264,18 +263,14 @@ void ProfileInterface::insertSnapmaticIPI(QWidget *widget)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
-#if QT_VERSION >= 0x050F00
         std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#else
-        qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
-        int picIndex = pictureKeyList.indexOf(QRegExp(widgetKey));
+        int picIndex = pictureKeyList.indexOf(widgetKey);
         ui->vlSnapmatic->insertWidget(picIndex, proWidget);
 
-        qApp->processEvents();
+        QApplication::processEvents();
         ui->saProfile->ensureWidgetVisible(proWidget, 0, 0);
     }
 }
@@ -288,15 +283,15 @@ void ProfileInterface::insertSavegameIPI(QWidget *widget)
         QString widgetKey = widgets[proWidget];
         QStringList widgetsKeyList = widgets.values();
         QStringList savegameKeyList = widgetsKeyList.filter("SGD", Qt::CaseSensitive);
-#if QT_VERSION >= 0x050F00
+#if QT_VERSION >= 0x050600
         std::sort(savegameKeyList.begin(), savegameKeyList.end());
 #else
         qSort(savegameKeyList.begin(), savegameKeyList.end());
 #endif
-        int sgdIndex = savegameKeyList.indexOf(QRegExp(widgetKey));
+        int sgdIndex = savegameKeyList.indexOf(widgetKey);
         ui->vlSavegame->insertWidget(sgdIndex, proWidget);
 
-        qApp->processEvents();
+        QApplication::processEvents();
         ui->saProfile->ensureWidgetVisible(proWidget, 0, 0);
     }
 }
@@ -311,11 +306,7 @@ void ProfileInterface::dialogNextPictureRequested(QWidget *dialog)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
-#if QT_VERSION >= 0x050F00
         std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#else
-        qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
@@ -326,7 +317,7 @@ void ProfileInterface::dialogNextPictureRequested(QWidget *dialog)
         }
         else
         {
-            picIndex = pictureKeyList.indexOf(QRegExp(widgetKey));
+            picIndex = pictureKeyList.indexOf(widgetKey);
         }
         picIndex++;
         if (pictureKeyList.length() > picIndex)
@@ -350,11 +341,7 @@ void ProfileInterface::dialogPreviousPictureRequested(QWidget *dialog)
         QStringList widgetsKeyList = widgets.values();
         QStringList pictureKeyList = widgetsKeyList.filter("PIC", Qt::CaseSensitive);
 #if QT_VERSION >= 0x050600
-#if QT_VERSION >= 0x050F00
         std::sort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#else
-        qSort(pictureKeyList.rbegin(), pictureKeyList.rend());
-#endif
 #else
         qSort(pictureKeyList.begin(), pictureKeyList.end(), qGreater<QString>());
 #endif
@@ -365,7 +352,7 @@ void ProfileInterface::dialogPreviousPictureRequested(QWidget *dialog)
         }
         else
         {
-            picIndex = pictureKeyList.indexOf(QRegExp(widgetKey));
+            picIndex = pictureKeyList.indexOf(widgetKey);
         }
         if (picIndex > 0)
         {
@@ -386,7 +373,7 @@ void ProfileInterface::sortingProfileInterface()
 
     QStringList widgetsKeyList = widgets.values();
 
-#if QT_VERSION >= 0x050F00
+#if QT_VERSION >= 0x050600
     std::sort(widgetsKeyList.begin(), widgetsKeyList.end());
 #else
     qSort(widgetsKeyList.begin(), widgetsKeyList.end());
@@ -408,7 +395,7 @@ void ProfileInterface::sortingProfileInterface()
     ui->vlSavegame->setEnabled(true);
     ui->vlSnapmatic->setEnabled(true);
 
-    qApp->processEvents();
+    QApplication::processEvents();
 }
 
 void ProfileInterface::profileLoaded_p()
@@ -772,7 +759,11 @@ bool ProfileInterface::importFile(QString selectedFile, QDateTime importDateTime
                         cEnough++;
                     }
                     spJson.createdDateTime = importDateTime;
+#if QT_VERSION >= 0x060000
+                    spJson.createdTimestamp = QString::number(spJson.createdDateTime.toSecsSinceEpoch()).toUInt();
+#else
                     spJson.createdTimestamp = spJson.createdDateTime.toTime_t();
+#endif
                     picture->setSnapmaticProperties(spJson);
                     picture->setPicFileName(QString("PRDR3%1").arg(QString::number(spJson.uid)));
                     picture->setPictureTitle(customImageTitle);
@@ -826,7 +817,11 @@ bool ProfileInterface::importFile(QString selectedFile, QDateTime importDateTime
                                 cEnough++;
                             }
                             spJson.createdDateTime = importDateTime;
+#if QT_VERSION >= 0x060000
+                            spJson.createdTimestamp = QString::number(spJson.createdDateTime.toSecsSinceEpoch()).toUInt();
+#else
                             spJson.createdTimestamp = spJson.createdDateTime.toTime_t();
+#endif
                             picture->setSnapmaticProperties(spJson);
                             picture->setPicFileName(QString("PRDR3%1").arg(QString::number(spJson.uid)));
                             picture->setPictureTitle(importDialog->getImageTitle());
@@ -1071,7 +1066,11 @@ bool ProfileInterface::importImage(QImage *snapmaticImage, QDateTime importDateT
                     cEnough++;
                 }
                 spJson.createdDateTime = importDateTime;
+#if QT_VERSION >= 0x060000
+                spJson.createdTimestamp = QString::number(spJson.createdDateTime.toSecsSinceEpoch()).toUInt();
+#else
                 spJson.createdTimestamp = spJson.createdDateTime.toTime_t();
+#endif
                 picture->setSnapmaticProperties(spJson);
                 picture->setPicFileName(QString("PRDR3%1").arg(QString::number(spJson.uid)));
                 picture->setPictureTitle(importDialog->getImageTitle());
@@ -1115,7 +1114,11 @@ bool ProfileInterface::importSnapmaticPicture(SnapmaticPicture *picture, bool wa
                 // Update Snapmatic uid
                 snapmaticProperties.uid = getRandomUid();
                 snapmaticProperties.createdDateTime = QDateTime::currentDateTime();
+#if QT_VERSION >= 0x060000
+                snapmaticProperties.createdTimestamp = QString::number(snapmaticProperties.createdDateTime.toSecsSinceEpoch()).toUInt();
+#else
                 snapmaticProperties.createdTimestamp = snapmaticProperties.createdDateTime.toTime_t();
+#endif
                 bool fExists = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid));
                 bool fExistsBackup = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid) % ".bak");
                 bool fExistsHidden = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid) % ".hidden");
@@ -1152,7 +1155,11 @@ bool ProfileInterface::importSnapmaticPicture(SnapmaticPicture *picture, bool wa
             // Update Snapmatic uid
             snapmaticProperties.uid = getRandomUid();
             snapmaticProperties.createdDateTime = QDateTime::currentDateTime();
+#if QT_VERSION >= 0x060000
+            snapmaticProperties.createdTimestamp = QString::number(snapmaticProperties.createdDateTime.toSecsSinceEpoch()).toUInt();
+#else
             snapmaticProperties.createdTimestamp = snapmaticProperties.createdDateTime.toTime_t();
+#endif
             bool fExists = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid));
             bool fExistsBackup = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid) % ".bak");
             bool fExistsHidden = QFile::exists(profileFolder % "/PRDR3" % QString::number(snapmaticProperties.uid) % ".hidden");
@@ -1325,7 +1332,7 @@ void ProfileInterface::exportSelected()
 
                 QString ExportPreSpan;
                 QString ExportPostSpan;
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
                 ExportPreSpan = "<span style=\"color: #003399; font-size: 12pt\">";
                 ExportPostSpan = "</span>";
 #else
@@ -2047,7 +2054,7 @@ void ProfileInterface::massTool(MassTool tool)
             else
             {
                 picture->emitUpdate();
-                qApp->processEvents();
+                QApplication::processEvents();
             }
         }
         pbDialog.close();
@@ -2146,7 +2153,7 @@ void ProfileInterface::massTool(MassTool tool)
             else
             {
                 picture->emitUpdate();
-                qApp->processEvents();
+                QApplication::processEvents();
             }
         }
         pbDialog.close();
@@ -2199,7 +2206,7 @@ preSelectionCrewID:
             }
             if (crewList.contains(QString::number(crewID)))
             {
-                indexNum = crewList.indexOf(QRegExp(QString::number(crewID)));
+                indexNum = crewList.indexOf(QString::number(crewID));
             }
             QString newCrew = QInputDialog::getItem(this, QApplication::translate("SnapmaticEditor", "Snapmatic Crew"), QApplication::translate("SnapmaticEditor", "New Snapmatic crew:"), itemList, indexNum, true, &ok, windowFlags()^Qt::Dialog^Qt::WindowMinMaxButtonsHint);
             if (ok && !newCrew.isEmpty())
@@ -2277,7 +2284,7 @@ preSelectionCrewID:
             else
             {
                 picture->emitUpdate();
-                qApp->processEvents();
+                QApplication::processEvents();
             }
         }
         pbDialog.close();
@@ -2380,7 +2387,7 @@ preSelectionTitle:
             else
             {
                 picture->emitUpdate();
-                qApp->processEvents();
+                QApplication::processEvents();
             }
         }
         pbDialog.close();

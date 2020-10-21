@@ -44,7 +44,7 @@
 #endif
 
 #ifndef GTA5SYNC_APPVER
-#define GTA5SYNC_APPVER "0.3.0"
+#define GTA5SYNC_APPVER "0.4.0"
 #endif
 
 #if __cplusplus
@@ -107,22 +107,16 @@
 #define GTA5SYNC_INLANG ":/tr"
 #endif
 #endif
-#endif
-
+#else
 #ifndef GTA5SYNC_SHARE
 #define GTA5SYNC_SHARE "RUNDIR:"
 #endif
-
 #ifndef GTA5SYNC_LANG
 #define GTA5SYNC_LANG "SHAREDDIR:SEPARATOR:lang"
 #endif
-
 #ifndef GTA5SYNC_PLUG
 #define GTA5SYNC_PLUG "RUNDIR:SEPARATOR:plugins"
 #endif
-
-#ifdef GTA5SYNC_WINRT
-#undef GTA5SYNC_WIN
 #endif
 
 #ifndef GTA5SYNC_COMPILER

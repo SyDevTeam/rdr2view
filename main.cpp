@@ -31,7 +31,6 @@
 #include "IconLoader.h"
 #include "AppEnv.h"
 #include "config.h"
-#include <QDesktopWidget>
 #include <QStringBuilder>
 #include <QSignalMapper>
 #include <QStyleFactory>
@@ -54,9 +53,17 @@
 #include <QFont>
 #include <QFile>
 
-#ifdef GTA5SYNC_WIN
+#if QT_VERSION < 0x060000
+#include <QDesktopWidget>
+#endif
+
+#ifdef Q_OS_WIN
 #include "windows.h"
 #include <iostream>
+#endif
+
+#ifdef GTA5SYNC_MOTD
+#include "MessageThread.h"
 #endif
 
 #ifdef GTA5SYNC_TELEMETRY
@@ -66,15 +73,15 @@
 int main(int argc, char *argv[])
 {
 #if QT_VERSION >= 0x050600
+#if QT_VERSION < 0x060000
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+#endif
 #endif
     QApplication a(argc, argv);
     a.setApplicationName(GTA5SYNC_APPSTR);
     a.setApplicationVersion(GTA5SYNC_APPVER);
     a.setQuitOnLastWindowClosed(false);
-
-    QResource::registerResource(":/global/global.rcc");
 
     QSettings settings(GTA5SYNC_APPVENDOR, GTA5SYNC_APPSTR);
     settings.beginGroup("Startup");
@@ -99,25 +106,12 @@ int main(int argc, char *argv[])
         }
     }
 
-#ifdef GTA5SYNC_WIN
+#ifdef Q_OS_WIN
 #if QT_VERSION >= 0x050400
     bool alwaysUseMessageFont = settings.value("AlwaysUseMessageFont", false).toBool();
     if (QSysInfo::windowsVersion() >= 0x0080 || alwaysUseMessageFont)
     {
-        // Get Windows Font
-        NONCLIENTMETRICS ncm;
-        ncm.cbSize = sizeof(ncm);
-        SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-        LOGFONTW uiFont = ncm.lfMessageFont;
-        QString uiFontStr(QString::fromStdWString(std::wstring(uiFont.lfFaceName)));
-
-#ifdef GTA5SYNC_DEBUG
-        qDebug() << QApplication::tr("Font") << QApplication::tr("Selected Font: %1").arg(uiFontStr);
-#endif
-
-        // Set Application Font
-        QFont appFont(uiFontStr, 9);
-        a.setFont(appFont);
+        a.setFont(QApplication::font("QMenu"));
     }
 #endif
 #endif
@@ -260,9 +254,7 @@ int main(int argc, char *argv[])
         bool readOk = picture.readingPictureFromFile(arg1);
         picDialog.setWindowIcon(IconLoader::loadingAppIcon());
         picDialog.setSnapmaticPicture(&picture, readOk);
-#ifndef Q_OS_LINUX
         picDialog.setWindowFlags(picDialog.windowFlags()^Qt::Dialog^Qt::Window);
-#endif
 
         int crewID = picture.getSnapmaticProperties().crewID;
         if (crewID != 0) { crewDB.addCrew(crewID); }
@@ -307,7 +299,26 @@ int main(int argc, char *argv[])
     QObject::connect(&threadDB, SIGNAL(finished()), &a, SLOT(quit()));
     threadDB.start();
 
+#ifdef GTA5SYNC_MOTD
+    uint cacheId;
+    {
+        QSettings messageSettings(GTA5SYNC_APPVENDOR, GTA5SYNC_APPSTR);
+        messageSettings.beginGroup("Messages");
+        cacheId = messageSettings.value("CacheId", 0).toUInt();
+        messageSettings.endGroup();
+    }
+    MessageThread threadMessage(cacheId);
+    QObject::connect(&threadMessage, SIGNAL(finished()), &threadDB, SLOT(terminateThread()));
+    threadMessage.start();
+#endif
+
+#ifdef GTA5SYNC_MOTD
+    UserInterface uiWindow(&profileDB, &crewDB, &threadDB, &threadMessage);
+    QObject::connect(&threadMessage, SIGNAL(messagesArrived(QJsonObject)), &uiWindow, SLOT(messagesArrived(QJsonObject)));
+    QObject::connect(&threadMessage, SIGNAL(updateCacheId(uint)), &uiWindow, SLOT(updateCacheId(uint)));
+#else
     UserInterface uiWindow(&profileDB, &crewDB, &threadDB);
+#endif
     uiWindow.setWindowIcon(IconLoader::loadingAppIcon());
     uiWindow.setupDirEnv();
 #ifdef Q_OS_ANDROID
