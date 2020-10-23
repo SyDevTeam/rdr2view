@@ -16,10 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "ImportDialog.h"
 #include "ui_ImportDialog.h"
+#include "SnapmaticPicture.h"
 #include "SidebarGenerator.h"
 #include "StandardPaths.h"
+#include "ImportDialog.h"
 #include "imagecropper.h"
 #include "AppEnv.h"
 #include "config.h"
@@ -39,8 +40,6 @@
 #include <QRgb>
 
 // IMAGES VALUES
-#define snapmaticResolutionW 960
-#define snapmaticResolutionH 536
 #define snapmaticAvatarResolution 470
 #define snapmaticAvatarPlacementW 145
 #define snapmaticAvatarPlacementH 66
@@ -139,7 +138,8 @@ void ImportDialog::processImage()
 {
     if (workImage.isNull()) return;
     QImage snapmaticImage = workImage;
-    QPixmap snapmaticPixmap(snapmaticResolutionW, snapmaticResolutionH);
+    QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+    QPixmap snapmaticPixmap(snapmaticResolution);
     snapmaticPixmap.fill(selectedColour);
     QPainter snapmaticPainter(&snapmaticPixmap);
     qreal screenRatioPR = AppEnv::screenRatioPR();
@@ -149,21 +149,21 @@ void ImportDialog::processImage()
         {
             int diffWidth = 0;
             int diffHeight = 0;
-            if (backImage.width() != snapmaticResolutionW)
+            if (backImage.width() != snapmaticResolution.width())
             {
-                diffWidth = snapmaticResolutionW - backImage.width();
+                diffWidth = snapmaticResolution.width() - backImage.width();
                 diffWidth = diffWidth / 2;
             }
-            else if (backImage.height() != snapmaticResolutionH)
+            else if (backImage.height() != snapmaticResolution.height())
             {
-                diffHeight = snapmaticResolutionH - backImage.height();
+                diffHeight = snapmaticResolution.height() - backImage.height();
                 diffHeight = diffHeight / 2;
             }
             snapmaticPainter.drawImage(0 + diffWidth, 0 + diffHeight, backImage);
         }
         else
         {
-            snapmaticPainter.drawImage(0, 0, QImage(backImage).scaled(snapmaticResolutionW, snapmaticResolutionH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            snapmaticPainter.drawImage(0, 0, QImage(backImage).scaled(snapmaticResolution, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         }
         if (ui->cbAvatar->isChecked() && ui->cbForceAvatarColour->isChecked())
         {
@@ -204,21 +204,21 @@ void ImportDialog::processImage()
         int diffHeight = 0;
         if (!ui->cbIgnore->isChecked())
         {
-            snapmaticImage = snapmaticImage.scaled(snapmaticResolutionW, snapmaticResolutionH, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            if (snapmaticImage.width() != snapmaticResolutionW)
+            snapmaticImage = snapmaticImage.scaled(snapmaticResolution, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            if (snapmaticImage.width() != snapmaticResolution.width())
             {
-                diffWidth = snapmaticResolutionW - snapmaticImage.width();
+                diffWidth = snapmaticResolution.width() - snapmaticImage.width();
                 diffWidth = diffWidth / 2;
             }
-            else if (snapmaticImage.height() != snapmaticResolutionH)
+            else if (snapmaticImage.height() != snapmaticResolution.height())
             {
-                diffHeight = snapmaticResolutionH - snapmaticImage.height();
+                diffHeight = snapmaticResolution.height() - snapmaticImage.height();
                 diffHeight = diffHeight / 2;
             }
         }
         else
         {
-            snapmaticImage = snapmaticImage.scaled(snapmaticResolutionW, snapmaticResolutionH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            snapmaticImage = snapmaticImage.scaled(snapmaticResolution, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         }
         snapmaticPainter.drawImage(0 + diffWidth, 0 + diffHeight, snapmaticImage);
         if (ui->cbWatermark->isChecked()) { processWatermark(&snapmaticPainter); }
@@ -575,15 +575,16 @@ QImage ImportDialog::image()
 
 void ImportDialog::setImage(QImage *image_)
 {
+    QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
     origImage = *image_;
     workImage = QImage();
     if (image_->width() == image_->height())
     {
         insideAvatarZone = true;
         ui->cbAvatar->setChecked(true);
-        if (image_->height() > snapmaticResolutionH)
+        if (image_->height() > snapmaticResolution.height())
         {
-            workImage = image_->scaled(snapmaticResolutionH, snapmaticResolutionH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            workImage = image_->scaled(snapmaticResolution.height(), snapmaticResolution.height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
             delete image_;
         }
         else
@@ -592,18 +593,18 @@ void ImportDialog::setImage(QImage *image_)
             delete image_;
         }
     }
-    else if (image_->width() > snapmaticResolutionW && image_->width() > image_->height())
+    else if (image_->width() > snapmaticResolution.width() && image_->width() > image_->height())
     {
         insideAvatarZone = false;
         ui->cbAvatar->setChecked(false);
-        workImage = image_->scaledToWidth(snapmaticResolutionW, Qt::SmoothTransformation);
+        workImage = image_->scaledToWidth(snapmaticResolution.width(), Qt::SmoothTransformation);
         delete image_;
     }
-    else if (image_->height() > snapmaticResolutionH && image_->height() > image_->width())
+    else if (image_->height() > snapmaticResolution.height() && image_->height() > image_->width())
     {
         insideAvatarZone = false;
         ui->cbAvatar->setChecked(false);
-        workImage = image_->scaledToHeight(snapmaticResolutionH, Qt::SmoothTransformation);
+        workImage = image_->scaledToHeight(snapmaticResolution.height(), Qt::SmoothTransformation);
         delete image_;
     }
     else
@@ -788,7 +789,7 @@ fileDialogPreOpen:
                 QMessageBox::warning(this, QApplication::translate("ProfileInterface", "Import"), QApplication::translate("ProfileInterface", "Can't import %1 because file can't be parsed properly").arg("\""+selectedFileName+"\""));
                 goto fileDialogPreOpen;
             }
-            backImage = importImage.scaled(snapmaticResolutionW, snapmaticResolutionH, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            backImage = importImage.scaled(SnapmaticPicture::getSnapmaticResolution(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
             backgroundPath = selectedFile;
             ui->labBackgroundImage->setText(tr("Background Image: %1").arg(tr("File", "Background Image: File")));
             ui->cmdBackgroundWipe->setVisible(true);

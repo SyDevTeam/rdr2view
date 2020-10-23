@@ -38,6 +38,7 @@ struct SnapmaticProperties {
     int size;
     int crewID;
     int streetID;
+    QSize pictureSize;
     QStringList playersList;
     uint createdTimestamp;
     QDateTime createdDateTime;

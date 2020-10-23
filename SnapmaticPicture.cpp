@@ -467,7 +467,7 @@ void SnapmaticPicture::updateStrings()
     pictureStr = tr("PHOTO - %1").arg(localProperties.createdDateTime.toString("MM/dd/yy HH:mm:ss"));
     sortStr = localProperties.createdDateTime.toString("yyMMddHHmmss") % QString::number(localProperties.uid);
     QString exportStr = localProperties.createdDateTime.toString("yyyyMMdd") % "-" % QString::number(localProperties.uid);
-    if (isModernFormat) { picFileName = "PRDR5" % QString::number(localProperties.uid); }
+    if (isModernFormat) { picFileName = "PRDR3" % QString::number(localProperties.uid); }
     picExportFileName = exportStr % "_" % cmpPicTitl;
 }
 
@@ -519,7 +519,17 @@ bool SnapmaticPicture::setImage(const QImage &picture)
                 }
             }
         }
-        if (saveSuccess) { return setPictureStream(picByteArray); }
+        if (saveSuccess) {
+            saveSuccess = setPictureStream(picByteArray);
+            if (saveSuccess) {
+                SnapmaticProperties properties = getSnapmaticProperties();
+                properties.pictureSize = picture.size();
+                if (!setSnapmaticProperties(properties)) {
+                    qDebug() << "Failed to refresh Snapmatic properties!";
+                }
+            }
+            return saveSuccess;
+        }
     }
     return false;
 }
@@ -1041,6 +1051,12 @@ void SnapmaticPicture::parseJsonContent()
         else { jsonError = true; }
     }
     // else { jsonIncomplete = true; } // Game release Snapmatic pictures prior May 2015 left out rsedtr, so don't force exists on that one
+    // RDR 2
+    if (jsonObject.contains("width") && jsonObject.contains("height")) {
+        if (jsonObject["width"].isDouble() && jsonObject["height"].isDouble()) { localProperties.pictureSize = QSize(jsonObject["width"].toInt(), jsonObject["height"].toInt()); }
+        else { jsonError = true; }
+    }
+    else { jsonIncomplete = true; }
 
     if (!jsonIncomplete && !jsonError)
     {
@@ -1086,6 +1102,10 @@ bool SnapmaticPicture::setSnapmaticProperties(SnapmaticProperties properties)
     jsonObject["slf"] = properties.isSelfie;
     jsonObject["drctr"] = properties.isFromDirector;
     jsonObject["rsedtr"] = properties.isFromRSEditor;
+
+    // RDR 2
+    jsonObject["width"] = properties.pictureSize.width();
+    jsonObject["height"] = properties.pictureSize.height();
 
     jsonDocument.setObject(jsonObject);
 
@@ -1346,8 +1366,7 @@ bool SnapmaticPicture::setPictureVisible()
 
 QSize SnapmaticPicture::getSnapmaticResolution()
 {
-    // keep old UI size for now
-    return QSize(960, 536);
+    return snapmaticResolution;
 }
 
 // SNAPMATIC DEFAULTS

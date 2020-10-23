@@ -144,13 +144,14 @@ void PictureDialog::setupPictureDialog()
 
     // Get Snapmatic Resolution
     QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+    QSize windowResolution = QSize(snapmaticResolution.width() / 2, snapmaticResolution.height() / 2);
 
     // Avatar area
     qreal screenRatio = AppEnv::screenRatio();
     qreal screenRatioPR = AppEnv::screenRatioPR();
     if (screenRatio != 1 || screenRatioPR != 1)
     {
-        avatarAreaPicture = QImage(":/img/avatararea.png").scaledToHeight(snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::FastTransformation);
+        avatarAreaPicture = QImage(":/img/avatararea.png").scaledToHeight(windowResolution.height() * screenRatio * screenRatioPR, Qt::FastTransformation);
     }
     else
     {
@@ -161,7 +162,7 @@ void PictureDialog::setupPictureDialog()
     avatarSize = 470;
 
     // DPI calculation (picture)
-    ui->labPicture->setFixedSize(snapmaticResolution.width() * screenRatio, snapmaticResolution.height() * screenRatio);
+    ui->labPicture->setFixedSize(windowResolution.width() * screenRatio, windowResolution.height() * screenRatio);
     ui->labPicture->setFocusPolicy(Qt::StrongFocus);
     ui->labPicture->setScaledContents(true);
 
@@ -209,8 +210,8 @@ void PictureDialog::setupPictureDialog()
     ui->jsonLayout->setContentsMargins(4 * screenRatio, 10 * screenRatio, 4 * screenRatio, 4 * screenRatio);
 
     // Pre-adapt window for DPI
-    setFixedWidth(snapmaticResolution.width() * screenRatio);
-    setFixedHeight(snapmaticResolution.height() * screenRatio);
+    setFixedWidth(windowResolution.width() * screenRatio);
+    setFixedHeight(windowResolution.height() * screenRatio);
 }
 
 PictureDialog::~PictureDialog()
@@ -287,7 +288,7 @@ void PictureDialog::adaptNewDialogSize(QSize newLabelSize)
 {
     Q_UNUSED(newLabelSize)
 #if QT_VERSION >= 0x050F00
-    int newDialogHeight = SnapmaticPicture::getSnapmaticResolution().height();
+    int newDialogHeight = SnapmaticPicture::getSnapmaticResolution().height() / 2;
 #else
     int newDialogHeight = (ui->labPicture->pixmap()->height() / AppEnv::screenRatioPR());
 #endif
@@ -609,10 +610,11 @@ void PictureDialog::renderPicture()
         if (overlayEnabled)
         {
             QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
-            QPixmap shownImagePixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
+            QSize windowResolution = QSize(snapmaticResolution.width() / 2, snapmaticResolution.height() / 2);
+            QPixmap shownImagePixmap(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR);
             shownImagePixmap.fill(Qt::transparent);
             QPainter shownImagePainter(&shownImagePixmap);
-            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             shownImagePainter.drawImage(3 * screenRatio * screenRatioPR, 3 * screenRatio * screenRatioPR, overlayTempImage);
             shownImagePainter.end();
 #if QT_VERSION >= 0x050600
@@ -623,10 +625,11 @@ void PictureDialog::renderPicture()
         else
         {
             QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
-            QPixmap shownImagePixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
+            QSize windowResolution = QSize(snapmaticResolution.width() / 2, snapmaticResolution.height() / 2);
+            QPixmap shownImagePixmap(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR);
             shownImagePixmap.fill(Qt::transparent);
             QPainter shownImagePainter(&shownImagePixmap);
-            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            shownImagePainter.drawImage(0, 0, snapmaticPicture.scaled(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             shownImagePainter.end();
 #if QT_VERSION >= 0x050600
             shownImagePixmap.setDevicePixelRatio(screenRatioPR);
@@ -638,11 +641,12 @@ void PictureDialog::renderPicture()
     {
         // Generating Avatar Preview
         QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
-        QPixmap avatarPixmap(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR);
+        QSize windowResolution = QSize(snapmaticResolution.width() / 2, snapmaticResolution.height() / 2);
+        QPixmap avatarPixmap(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR);
         QPainter snapPainter(&avatarPixmap);
         QFont snapPainterFont;
         snapPainterFont.setPixelSize(12 * screenRatio * screenRatioPR);
-        snapPainter.drawImage(0, 0, snapmaticPicture.scaled(snapmaticResolution.width() * screenRatio * screenRatioPR, snapmaticResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        snapPainter.drawImage(0, 0, snapmaticPicture.scaled(windowResolution.width() * screenRatio * screenRatioPR, windowResolution.height() * screenRatio * screenRatioPR, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         snapPainter.drawImage(0, 0, avatarAreaPicture);
         snapPainter.setPen(QColor::fromRgb(255, 255, 255, 255));
         snapPainter.setFont(snapPainterFont);

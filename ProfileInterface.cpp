@@ -697,7 +697,8 @@ bool ProfileInterface::importFile(QString selectedFile, QDateTime importDateTime
                         return false;
                     }
                     QString customImageTitle;
-                    QPixmap snapmaticPixmap(960, 536);
+                    QSize snapmaticResolution = SnapmaticPicture::getSnapmaticResolution();
+                    QPixmap snapmaticPixmap(snapmaticResolution);
                     snapmaticPixmap.fill(Qt::black);
                     QPainter snapmaticPainter(&snapmaticPixmap);
                     if (snapmaticImage.height() == snapmaticImage.width())
@@ -724,15 +725,15 @@ bool ProfileInterface::importFile(QString selectedFile, QDateTime importDateTime
                         // Picture mode
                         int diffWidth = 0;
                         int diffHeight = 0;
-                        snapmaticImage = snapmaticImage.scaled(960, 536, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                        if (snapmaticImage.width() != 960)
+                        snapmaticImage = snapmaticImage.scaled(snapmaticResolution, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                        if (snapmaticImage.width() != snapmaticResolution.height())
                         {
-                            diffWidth = 960 - snapmaticImage.width();
+                            diffWidth = snapmaticResolution.height() - snapmaticImage.width();
                             diffWidth = diffWidth / 2;
                         }
-                        else if (snapmaticImage.height() != 536)
+                        else if (snapmaticImage.height() != snapmaticResolution.width())
                         {
-                            diffHeight = 536 - snapmaticImage.height();
+                            diffHeight = snapmaticResolution.width() - snapmaticImage.height();
                             diffHeight = diffHeight / 2;
                         }
                         snapmaticPainter.drawImage(0 + diffWidth, 0 + diffHeight, snapmaticImage);

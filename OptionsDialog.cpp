@@ -16,9 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "OptionsDialog.h"
 #include "ui_OptionsDialog.h"
 #include "TranslationClass.h"
+#include "SnapmaticPicture.h"
+#include "OptionsDialog.h"
 #include "StandardPaths.h"
 #include "UserInterface.h"
 #include "AppEnv.h"
@@ -74,7 +75,7 @@ OptionsDialog::OptionsDialog(ProfileDatabase *profileDB, QWidget *parent) :
     int desktopSizeHeight = desktopResolution.height();
 #endif
     aspectRatio = Qt::KeepAspectRatio;
-    defExportSize = QSize(960, 536);
+    defExportSize = SnapmaticPicture::getSnapmaticResolution();
     cusExportSize = defExportSize;
     defaultQuality = 100;
     customQuality = 100;
